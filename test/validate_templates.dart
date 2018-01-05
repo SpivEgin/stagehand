@@ -29,7 +29,7 @@ final List<RegExp> _pubspecOrderRegexps =
 
 final String _expectedGitIgnore = _getMetaTemplateFile('.gitignore');
 final String _expectedAnalysisOptions =
-    _getMetaTemplateFile('analysis_options.yaml');
+    _getMetaTemplateFile('templates/analysis_options.yaml');
 
 void main() {
   Directory dir;
@@ -56,7 +56,7 @@ void main() {
     _validatePubspec(pubspecContent);
   });
 
-  for (stagehand.Generator generator in stagehand.generators) {
+  for (var generator in stagehand.generators) {
     test(generator.id, () {
       _testGenerator(generator, dir);
     });
@@ -72,12 +72,12 @@ void _testGenerator(stagehand.Generator generator, Directory tempDir) {
   var gitIgnoreFile = new File(gitIgnorePath);
 
   expect(gitIgnoreFile.readAsStringSync(), _expectedGitIgnore,
-      reason: "Expected all of the .gitignore files to be identical.");
+      reason: 'Expected all of the .gitignore files to be identical.');
 
   var analysisOptionsPath = path.join(tempDir.path, 'analysis_options.yaml');
   var analysisOptionsFile = new File(analysisOptionsPath);
   expect(analysisOptionsFile.readAsStringSync(), _expectedAnalysisOptions,
-      reason: "All analysis_options.yaml files should be identical.");
+      reason: 'All analysis_options.yaml files should be identical.');
 
   var pubspecPath = path.join(tempDir.path, 'pubspec.yaml');
   var pubspecFile = new File(pubspecPath);
@@ -106,7 +106,7 @@ void _testGenerator(stagehand.Generator generator, Directory tempDir) {
 
   // Run the analyzer.
   if (filePath != null) {
-    Directory cwd = Directory.current;
+    var cwd = Directory.current;
     try {
       // TODO: Extend Analyzer.analyze to support .packages files.
       Directory.current = tempDir.path;
@@ -128,9 +128,9 @@ void _testGenerator(stagehand.Generator generator, Directory tempDir) {
   expect(pubspecContent, containsPair('version', '0.0.1'));
 
   final usesAngular =
-      pubspecContent['dependencies']?.containsKey('angular2') ?? false;
-  final minSDK = usesAngular ? '1.23.0' : '1.20.1';
-  final env = {'sdk': '>=${minSDK} <2.0.0'};
+      pubspecContent['dependencies']?.containsKey('angular') ?? false;
+  final minSDK = usesAngular ? '1.24.0' : '1.20.1';
+  final env = {'sdk': '>=$minSDK <2.0.0'};
   expect(pubspecContent, containsPair('environment', env));
 
   // Run package tests, if `test` is included.
@@ -156,15 +156,12 @@ void _validatePubspec(String pubspecContentString) {
           "Top-level keys in the pubspec were not in the expected order: ${_pubspecOrder.join(',')}");
 }
 
-/**
- * Return the list of children for the given directory. This list is normalized
- * (by sorting on the file path) in order to prevent large merge diffs in the
- * generated template data files.
- */
+/// Return the list of children for the given directory. This list is normalized
+/// (by sorting on the file path) in order to prevent large merge diffs in the
+/// generated template data files.
 List<FileSystemEntity> _listSync(Directory dir,
     {bool recursive: false, bool followLinks: true}) {
-  List<FileSystemEntity> results =
-      dir.listSync(recursive: recursive, followLinks: followLinks);
+  var results = dir.listSync(recursive: recursive, followLinks: followLinks);
   results.sort((entity1, entity2) => entity1.path.compareTo(entity2.path));
   return results;
 }

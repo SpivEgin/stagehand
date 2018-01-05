@@ -17,7 +17,7 @@ void main() {
 Future _testGenerator(Generator generator) async {
   expect(generator.id, isNotNull);
 
-  MockTarget target = new MockTarget();
+  var target = new MockTarget();
 
   // Assert that we can generate the template.
   await generator.generate('foo', target);
@@ -30,6 +30,7 @@ Future _testGenerator(Generator generator) async {
 class MockTarget extends GeneratorTarget {
   final Map<String, List<int>> _files = {};
 
+  @override
   Future createFile(String path, List<int> contents) async {
     _files[path] = contents;
   }

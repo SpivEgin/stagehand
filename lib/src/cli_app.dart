@@ -14,16 +14,15 @@ import 'package:stagehand/src/common.dart';
 import 'package:stagehand/stagehand.dart';
 import 'package:usage/usage_io.dart';
 
-const String APP_NAME = 'stagehand';
+const String appName = 'stagehand';
 
 // This version must be updated in tandem with the pubspec version.
-const String APP_VERSION = '1.1.3';
+const String appVersion = '1.1.8';
 
-const String APP_PUB_INFO =
-    'https://pub.dartlang.org/packages/${APP_NAME}.json';
+const String appPubInfo = 'https://pub.dartlang.org/packages/$appName.json';
 
 // The Google Analytics tracking ID for stagehand.
-const String _GA_TRACKING_ID = 'UA-55033590-1';
+const String _gaTrackingId = 'UA-55033590-1';
 
 class CliApp {
   static final Duration _timeout = const Duration(milliseconds: 500);
@@ -39,22 +38,20 @@ class CliApp {
     assert(generators != null);
     assert(logger != null);
 
-    analytics = new AnalyticsIO(_GA_TRACKING_ID, APP_NAME, APP_VERSION);
+    analytics = new AnalyticsIO(_gaTrackingId, appName, appVersion);
 
     generators.sort();
   }
 
   io.Directory get cwd => _cwd != null ? _cwd : io.Directory.current;
 
-  /**
-   * An override for the directory to generate into; public for testing.
-   */
+  /// An override for the directory to generate into; public for testing.
   set cwd(io.Directory value) {
     _cwd = value;
   }
 
   Future process(List<String> args) {
-    ArgParser argParser = _createArgParser();
+    var argParser = _createArgParser();
 
     ArgResults options;
 
@@ -83,12 +80,12 @@ class CliApp {
     }
 
     if (options['version']) {
-      _out('${APP_NAME} version: ${APP_VERSION}');
-      return http.get(APP_PUB_INFO).then((response) {
+      _out('$appName version: $appVersion');
+      return http.get(appPubInfo).then((response) {
         List versions = JSON.decode(response.body)['versions'];
-        if (APP_VERSION != versions.last) {
-          _out("Version ${versions.last} is available! Run `pub global activate"
-              " ${APP_NAME}` to get the latest.");
+        if (appVersion != versions.last) {
+          _out('Version ${versions.last} is available! Run `pub global activate'
+              ' $appName` to get the latest.');
         }
       }).catchError((e) => null);
     }
@@ -96,12 +93,12 @@ class CliApp {
     if (options['help'] || args.isEmpty) {
       // Prompt to opt into advanced analytics.
       if (analytics.firstRun) {
-        _out("""
+        _out('''
 Welcome to Stagehand! We collect anonymous usage statistics and crash reports in
 order to improve the tool (http://goo.gl/6wsncI). Would you like to opt-in to
-additional analytics to help us improve Stagehand [y/yes/no]?""");
+additional analytics to help us improve Stagehand [y/yes/no]?''');
         io.stdout.flush();
-        String response = io.stdin.readLineSync();
+        var response = io.stdin.readLineSync();
         response = response.toLowerCase().trim();
         analytics.enabled = (response == 'y' || response == 'yes');
         _out('');
@@ -123,27 +120,27 @@ additional analytics to help us improve Stagehand [y/yes/no]?""");
     }
 
     if (options.rest.isEmpty) {
-      logger.stderr("No generator specified.\n");
+      logger.stderr('No generator specified.\n');
       _usage(argParser);
       return new Future.error(new ArgError('no generator specified'));
     }
 
     if (options.rest.length >= 2) {
-      logger.stderr("Error: too many arguments given.\n");
+      logger.stderr('Error: too many arguments given.\n');
       _usage(argParser);
       return new Future.error(new ArgError('invalid generator'));
     }
 
-    String generatorName = options.rest.first;
-    Generator generator = _getGenerator(generatorName);
+    var generatorName = options.rest.first;
+    var generator = _getGenerator(generatorName);
 
     if (generator == null) {
-      logger.stderr("'${generatorName}' is not a valid generator.\n");
+      logger.stderr("'$generatorName' is not a valid generator.\n");
       _usage(argParser);
       return new Future.error(new ArgError('invalid generator'));
     }
 
-    io.Directory dir = cwd;
+    var dir = cwd;
 
     if (!options['override'] && !_isDirEmpty(dir)) {
       logger.stderr(
@@ -153,14 +150,14 @@ additional analytics to help us improve Stagehand [y/yes/no]?""");
     }
 
     // Normalize the project name.
-    String projectName = path.basename(dir.path);
+    var projectName = path.basename(dir.path);
     projectName = normalizeProjectName(projectName);
 
     if (target == null) {
       target = new _DirectoryGeneratorTarget(logger, dir);
     }
 
-    _out("Creating ${generatorName} application '${projectName}':");
+    _out('Creating $generatorName application `$projectName`:');
 
     _screenView('create');
     analytics.sendEvent('create', generatorName, label: generator.description);
@@ -169,23 +166,24 @@ additional analytics to help us improve Stagehand [y/yes/no]?""");
 
     if (!options.wasParsed('author')) {
       try {
-        io.ProcessResult result =
-            io.Process.runSync('git', ['config', 'user.name']);
+        var result = io.Process.runSync('git', ['config', 'user.name']);
         if (result.exitCode == 0) author = result.stdout.trim();
-      } catch (exception) {}
+      } catch (exception) {
+        // NOOP
+      }
     }
 
     var vars = {'author': author};
 
-    Future f = generator.generate(projectName, target, additionalVars: vars);
+    var f = generator.generate(projectName, target, additionalVars: vars);
     return f.then((_) {
-      _out("${generator.numFiles()} files written.");
+      _out('${generator.numFiles()} files written.');
 
-      String message = generator.getInstallInstructions();
+      var message = generator.getInstallInstructions();
       if (message != null && message.isNotEmpty) {
         message = message.trim();
-        message = message.split('\n').map((line) => "--> ${line}").join("\n");
-        _out("\n${message}");
+        message = message.split('\n').map((line) => '--> $line').join('\n');
+        _out('\n$message');
       }
     }).then((_) {
       return analytics.waitForLastPing(timeout: _timeout);
@@ -200,7 +198,7 @@ additional analytics to help us improve Stagehand [y/yes/no]?""");
         help: 'Opt out of anonymous usage and crash reporting.');
     argParser.addFlag('help', abbr: 'h', negatable: false, help: 'Help!');
     argParser.addFlag('version',
-        negatable: false, help: 'Display the version for ${APP_NAME}.');
+        negatable: false, help: 'Display the version for $appName.');
     argParser.addOption('author',
         defaultsTo: '<your name>',
         help: 'The author name to use for file headers.');
@@ -218,8 +216,8 @@ additional analytics to help us improve Stagehand [y/yes/no]?""");
   }
 
   String _createMachineInfo(List<Generator> generators) {
-    Iterable itor = generators.map((Generator generator) {
-      Map m = {
+    var itor = generators.map((Generator generator) {
+      var m = {
         'name': generator.id,
         'label': generator.label,
         'description': generator.description
@@ -238,13 +236,14 @@ additional analytics to help us improve Stagehand [y/yes/no]?""");
     _out(
         'Stagehand will generate the given application type into the current directory.');
     _out('');
-    _out('usage: ${APP_NAME} <generator-name>');
+    _out('usage: $appName <generator-name>');
     _out(argParser.usage);
     _out('');
     _out('Available generators:');
-    int len = generators.map((g) => g.id.length).fold(0, (a, b) => max(a, b));
+    var len =
+        generators.map((g) => g.id.length).fold(0, (int a, b) => max(a, b));
     generators
-        .map((g) => "  ${_pad(g.id, len)} - ${g.description}")
+        .map((g) => '  ${_pad(g.id, len)} - ${g.description}')
         .forEach(logger.stdout);
   }
 
@@ -260,10 +259,8 @@ additional analytics to help us improve Stagehand [y/yes/no]?""");
     analytics.sendScreenView(view);
   }
 
-  /**
-   * Returns true if the given directory does not contain non-symlinked,
-   * non-hidden subdirectories.
-   */
+  /// Returns true if the given directory does not contain non-symlinked,
+  /// non-hidden subdirectories.
   bool _isDirEmpty(io.Directory dir) {
     var isHiddenDir = (dir) => path.basename(dir.path).startsWith('.');
 
@@ -278,6 +275,8 @@ additional analytics to help us improve Stagehand [y/yes/no]?""");
 class ArgError implements Exception {
   final String message;
   ArgError(this.message);
+
+  @override
   String toString() => message;
 }
 
@@ -294,8 +293,9 @@ class _DirectoryGeneratorTarget extends GeneratorTarget {
     dir.createSync();
   }
 
+  @override
   Future createFile(String filePath, List<int> contents) {
-    io.File file = new io.File(path.join(dir.path, filePath));
+    var file = new io.File(path.join(dir.path, filePath));
 
     logger.stdout('  ${file.path}');
 

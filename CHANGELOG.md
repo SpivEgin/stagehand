@@ -1,3 +1,42 @@
+## 1.1.8
+
+- Deleted most license/copyright text and made READMEs more consistent.
+- Updated `web-angular` to `angular_components` 0.8.0.
+
+## 1.1.7
+
+- Updated `web-angular` template pubspec: using `angular_components` 0.7.0.
+- Improved the format of Stagehand's own code by enabling several lints.
+
+## 1.1.6
+
+- Added a missing copyright to a web-angular template file.
+- Removed the `close_sinks` lint from all analysis options files.
+- Moved to `dart-lang` GitHub org.
+- Updated `web-angular` to `angular` 4 and `angular_components` 0.6.0.
+
+## 1.1.5
+
+- Updated the `sdk` dependency so that Stagehand can work with
+  2.0.0-dev.* releases.
+
+## 1.1.4
+
+- Made changes related to
+  [dartdevc](https://webdev.dartlang.org/tools/dartdevc)
+  (which pub supports, as of SDK 1.24):
+  - Updated `web-angular` to use `lib/src` for everything but the
+    main app.
+  - Added commented-out pubspec settings to the `web-angular` and
+   `web-simple` templates, demonstrating how to make `pub serve`
+    use dartdevc.
+- Added favicons to the `web-angular` and `web-simple` templates.
+- Added Enter key support to the `web-angular` template.
+- Improved the CSS for the `web-simple` template.
+- Updated analysis options for the stagehand package.
+- Changed the name of `server-shelf` from "Shelf Web Server" to
+  "Web Server".
+
 ## 1.1.3
 
 - Removed `platform_*` options from `web-angular`.

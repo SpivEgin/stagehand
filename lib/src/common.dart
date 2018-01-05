@@ -2,15 +2,13 @@
 // All rights reserved. Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-/**
- * Some utility methods for stagehand.
- */
+/// Some utility methods for stagehand.
 
 import 'dart:convert' show BASE64, UTF8;
 
 import '../stagehand.dart';
 
-const int _RUNE_SPACE = 32;
+const int _runeSpace = 32;
 
 final _substitueRegExp = new RegExp(r'__([a-zA-Z]+)__');
 final _nonValidSubstitueRegExp = new RegExp('[^a-zA-Z]');
@@ -18,19 +16,19 @@ final _nonValidSubstitueRegExp = new RegExp('[^a-zA-Z]');
 final _whiteSpace = new RegExp(r'\s+');
 
 List<TemplateFile> decodeConcatenatedData(List<String> data) {
-  List<TemplateFile> results = [];
+  var results = <TemplateFile>[];
 
-  for (int i = 0; i < data.length; i += 3) {
-    String path = data[i];
-    String type = data[i + 1];
-    String raw = data[i + 2].replaceAll(_whiteSpace, '');
+  for (var i = 0; i < data.length; i += 3) {
+    var path = data[i];
+    var type = data[i + 1];
+    var raw = data[i + 2].replaceAll(_whiteSpace, '');
 
-    List<int> decoded = BASE64.decode(raw);
+    var decoded = BASE64.decode(raw);
 
     if (type == 'binary') {
       results.add(new TemplateFile.fromBinary(path, decoded));
     } else {
-      String source = UTF8.decode(decoded);
+      var source = UTF8.decode(decoded);
       results.add(new TemplateFile(path, source));
     }
   }
@@ -38,9 +36,7 @@ List<TemplateFile> decodeConcatenatedData(List<String> data) {
   return results;
 }
 
-/**
- * Convert a directory name into a reasonably legal pub package name.
- */
+/// Convert a directory name into a reasonably legal pub package name.
 String normalizeProjectName(String name) {
   name = name.replaceAll('-', '_').replaceAll(' ', '_');
 
@@ -52,23 +48,27 @@ String normalizeProjectName(String name) {
   return name;
 }
 
-/**
- * Given a `String` [str] with mustache templates, and a [Map] of String key /
- * value pairs, substitute all instances of `__key__` for `value`. I.e.,
- *
- *     Foo __projectName__ baz.
- *
- * and
- *
- *     {'projectName': 'bar'}
- *
- * becomes:
- *
- *     Foo bar baz.
- *
- * A key value can only be an ASCII string made up of letters: A-Z, a-z.
- * No whitespace, numbers, or other characters are allowed.
- */
+/// Given a `String` [str] with mustache templates, and a [Map] of String key /
+/// value pairs, substitute all instances of `__key__` for `value`. I.e.,
+///
+/// ```
+/// Foo __projectName__ baz.
+/// ```
+///
+/// and
+///
+/// ```
+/// {'projectName': 'bar'}
+/// ```
+///
+/// becomes:
+///
+/// ```
+/// Foo bar baz.
+/// ```
+///
+/// A key value can only be an ASCII string made up of letters: A-Z, a-z.
+/// No whitespace, numbers, or other characters are allowed.
 String substituteVars(String str, Map<String, String> vars) {
   var nonValidKeys =
       vars.keys.where((k) => k.contains(_nonValidSubstitueRegExp)).toList();
@@ -87,24 +87,20 @@ String substituteVars(String str, Map<String, String> vars) {
   });
 }
 
-/**
- * Convert the given String into a String with newlines wrapped at an 80 column
- * boundary, with 2 leading spaces for each line.
- */
+/// Convert the given String into a String with newlines wrapped at an 80 column
+/// boundary, with 2 leading spaces for each line.
 String convertToYamlMultiLine(String str) {
-  return wrap(str, 78).map((line) => '  ${line}').join('\n');
+  return wrap(str, 78).map((line) => '  $line').join('\n');
 }
 
-/**
- * Break the given String into lines wrapped on a [col] boundary.
- */
+/// Break the given String into lines wrapped on a [col] boundary.
 List<String> wrap(String str, [int col = 80]) {
-  List<String> lines = [];
+  var lines = <String>[];
 
   while (str.length > col) {
-    int index = col;
+    var index = col;
 
-    while (index > 0 && str.codeUnitAt(index) != _RUNE_SPACE) {
+    while (index > 0 && str.codeUnitAt(index) != _runeSpace) {
       index--;
     }
 
@@ -131,9 +127,7 @@ List<String> wrap(String str, [int col = 80]) {
   return lines;
 }
 
-/**
- * An abstract implementation of a [Generator].
- */
+/// An abstract implementation of a [Generator].
 abstract class DefaultGenerator extends Generator {
   DefaultGenerator(String id, String label, String description,
       {List<String> categories: const []})
@@ -142,6 +136,7 @@ abstract class DefaultGenerator extends Generator {
   TemplateFile addFile(String path, String contents) =>
       addTemplateFile(new TemplateFile(path, contents));
 
+  @override
   String getInstallInstructions() {
     if (getFile('pubspec.yaml') != null) {
       return "to provision required packages, run 'pub get'";

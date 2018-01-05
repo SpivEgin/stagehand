@@ -2,8 +2,8 @@
 // All rights reserved. Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-import 'dart:io';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:ghpages_generator/ghpages_generator.dart' as ghpages;
@@ -11,10 +11,7 @@ import 'package:grinder/grinder.dart';
 import 'package:path/path.dart' as path;
 import 'package:stagehand/stagehand.dart' as stagehand;
 
-const List<String> _allowedDotFiles = const <String>[
-  ".gitignore",
-  ".analysis_options"
-];
+const List<String> _allowedDotFiles = const <String>['.gitignore'];
 
 final RegExp _binaryFileTypes = new RegExp(
     r'\.(jpe?g|png|gif|ico|svg|ttf|eot|woff|woff2)$',
@@ -32,12 +29,12 @@ void build() {
   });
 
   // Update the readme.md file.
-  File f = getFile('README.md');
-  String source = f.readAsStringSync();
-  String fragment = stagehand.generators.map((g) {
+  var f = getFile('README.md');
+  var source = f.readAsStringSync();
+  var fragment = stagehand.generators.map((g) {
     return '* `${g.id}` - ${g.description}';
   }).join('\n');
-  String newSource = _replaceInString(
+  var newSource = _replaceInString(
       source, '## Stagehand templates', '## Installation', fragment + '\n');
   f.writeAsStringSync(newSource);
 
@@ -66,41 +63,41 @@ test() => new TestRunner().testAsync(files: 'test/validate_templates.dart');
 void _concatenateFiles(Directory src, File target) {
   log('Creating ${target.path}');
 
-  String str = _traverse(src, '').map((s) => '  ${_toStr(s)}').join(',\n');
+  var str = _traverse(src, '').map((s) => '  ${_toStr(s)}').join(',\n');
 
-  target.writeAsStringSync("""
+  target.writeAsStringSync('''
 // Copyright (c) ${_currentYear()}, Google Inc. Please see the AUTHORS file for details.
 // All rights reserved. Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
 const List<String> data = const [
-${str}
+$str
 ];
-""");
+''');
 }
 
 String _toStr(String s) {
   if (s.contains('\n')) {
-    return '"""${s}"""';
+    return "'''$s'''";
   } else {
-    return '"${s}"';
+    return "'$s'";
   }
 }
 
 Iterable<String> _traverse(Directory dir, String root) sync* {
   var files = _listSync(dir, recursive: false, followLinks: false);
-  for (FileSystemEntity entity in files) {
+  for (var entity in files) {
     if (entity is Link) continue;
 
-    String name = path.basename(entity.path);
+    var name = path.basename(entity.path);
     if (name == 'pubspec.lock') continue;
     if (name == 'build' && entity is Directory) continue;
     if (name.startsWith('.') && !_allowedDotFiles.contains(name)) continue;
 
     if (entity is Directory) {
-      yield* _traverse(entity, '${root}${name}/');
+      yield* _traverse(entity, '$root$name/');
     } else {
-      yield '${root}${name}';
+      yield '$root$name';
       yield _isBinaryFile(name) ? 'binary' : 'text';
 
       var encoded = BASE64.encode((entity as File).readAsBytesSync());
@@ -124,20 +121,17 @@ Iterable<String> _traverse(Directory dir, String root) sync* {
   }
 }
 
-/**
- * Returns true if the given [filename] matches common image file name patterns.
- */
+/// Returns `true` if the given [filename] matches common image file name
+/// patterns.
 bool _isBinaryFile(String filename) => _binaryFileTypes.hasMatch(filename);
 
-/**
- * Return the list of children for the given directory. This list is normalized
- * (by sorting on the file path) in order to prevent large merge diffs in the
- * generated template data files.
- */
+/// Return the list of children for the given directory.
+///
+/// This list is normalized (by sorting on the file path) in order to prevent
+/// large merge diffs in the generated template data files.
 List<FileSystemEntity> _listSync(Directory dir,
     {bool recursive: false, bool followLinks: true}) {
-  List<FileSystemEntity> results =
-      dir.listSync(recursive: recursive, followLinks: followLinks);
+  var results = dir.listSync(recursive: recursive, followLinks: followLinks);
   results.sort((entity1, entity2) => entity1.path.compareTo(entity2.path));
   return results;
 }
@@ -146,8 +140,8 @@ List<FileSystemEntity> _listSync(Directory dir,
 /// [replacement], and return the result.
 String _replaceInString(
     String source, String start, String end, String replacement) {
-  int startIndex = source.indexOf(start);
-  int endIndex = source.indexOf(end, startIndex + 1);
+  var startIndex = source.indexOf(start);
+  var endIndex = source.indexOf(end, startIndex + 1);
 
   if (startIndex == -1 || endIndex == -1) {
     fail('Could not find text to replace');

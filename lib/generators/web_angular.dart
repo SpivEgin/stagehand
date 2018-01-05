@@ -2,25 +2,23 @@
 // All rights reserved. Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-import '../stagehand.dart';
 import '../src/common.dart';
 import 'web_angular_data.dart';
 
-/**
- * A generator for an Angular 2 application.
- */
+/// A generator for an Angular 2 application.
 class WebAngularGenerator extends DefaultGenerator {
   WebAngularGenerator()
       : super('web-angular', 'AngularDart Web App',
             'A web app with material design components.',
             categories: const ['dart', 'web']) {
-    for (TemplateFile file in decodeConcatenatedData(data)) {
+    for (var file in decodeConcatenatedData(data)) {
       addTemplateFile(file);
     }
 
     setEntrypoint(getFile('web/index.html'));
   }
 
-  String getInstallInstructions() => "${super.getInstallInstructions()}\n"
-      "to run your app, use 'pub serve'";
+  @override
+  String getInstallInstructions() => '${super.getInstallInstructions()}\n'
+      'to run your app, use `pub serve`.';
 }

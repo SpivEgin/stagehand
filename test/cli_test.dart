@@ -78,10 +78,13 @@ void main() {
 }
 
 class CliLoggerMock implements CliLogger {
-  StringBuffer _stdout = new StringBuffer();
-  StringBuffer _stderr = new StringBuffer();
+  final StringBuffer _stdout = new StringBuffer();
+  final StringBuffer _stderr = new StringBuffer();
 
+  @override
   void stderr(String message) => _stderr.write(message);
+
+  @override
   void stdout(String message) => _stdout.write(message);
 
   String getStdout() => _stdout.toString();
@@ -91,6 +94,7 @@ class CliLoggerMock implements CliLogger {
 class GeneratorTargetMock implements GeneratorTarget {
   int createdCount = 0;
 
+  @override
   Future createFile(String path, List<int> contents) {
     expect(contents, isNot(isEmpty));
     expect(path, isNot(startsWith('/')));
